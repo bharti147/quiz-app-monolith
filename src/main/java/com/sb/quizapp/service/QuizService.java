@@ -5,6 +5,7 @@ import com.sb.quizapp.dao.QuizDao;
 import com.sb.quizapp.model.Question;
 import com.sb.quizapp.model.QuestionWrapper;
 import com.sb.quizapp.model.Quiz;
+import com.sb.quizapp.model.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +42,7 @@ public class QuizService {
         }
     }
 
+
     public ResponseEntity<List<QuestionWrapper>> getQuizQuestions(int quizId){
         try {
         Optional<Quiz> quiz = quizDao.findById(quizId);
@@ -55,7 +57,7 @@ public class QuizService {
         }
 
 
-            return new ResponseEntity<>(questionsForUser, HttpStatus.CREATED);
+            return new ResponseEntity<>(questionsForUser, HttpStatus.OK);
         }
         catch(Exception e){
             e.printStackTrace();
@@ -64,4 +66,23 @@ public class QuizService {
     }
 
 
+    public ResponseEntity<Integer> calculateResult(Integer quizId, List<Response> responses) {
+
+        try {
+            Optional<Quiz> quiz = quizDao.findById(quizId);
+            List<Question> questionsOfQuiz = quiz.get().getQuestions();
+            int score=0;
+            int i = 0;
+          for(Response response: responses){
+              if(response.getResponse().equals(questionsOfQuiz.get(i).getRightAnswer()))
+                  score++;
+                  i++;
+          }
+            return new ResponseEntity<>(score, HttpStatus.OK);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            return new ResponseEntity<>(0, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
